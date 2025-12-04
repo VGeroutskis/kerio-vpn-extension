@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.kerio-vpn" path="/org/gnome/shell/extensions/kerio-vpn/">
+    <key name="auto-connect" type="b">
+      <default>false</default>
+      <summary>Auto-connect on startup</summary>
+      <description>Automatically connect to VPN when the extension is enabled</description>
+    </key>
+    <key name="show-notifications" type="b">
+      <default>true</default>
+      <summary>Show notifications</summary>
+      <description>Display notifications when VPN connection status changes</description>
+    </key>
+    <key name="check-interval" type="i">
+      <default>5</default>
+      <summary>Status check interval</summary>
+      <description>How often to check VPN status in seconds</description>
+    </key>
+    <key name="auto-reconnect" type="b">
+      <default>false</default>
+      <summary>Auto-reconnect on disconnect</summary>
+      <description>Automatically reconnect if VPN connection drops</description>
+    </key>
+    <key name="show-connection-info" type="b">
+      <default>true</default>
+      <summary>Show connection info</summary>
+      <description>Display IP address and connection duration in menu</description>
+    </key>
+    <key name="vpn-server" type="s">
+      <default>''</default>
+      <summary>VPN Server</summary>
+      <description>Kerio VPN server address</description>
+    </key>
+    <key name="vpn-username" type="s">
+      <default>''</default>
+      <summary>VPN Username</summary>
+      <description>Username for VPN connection</description>
+    </key>
+    <key name="vpn-password" type="s">
+      <default>''</default>
+      <summary>VPN Password</summary>
+      <description>Password for VPN connection (stored in GNOME keyring)</description>
+    </key>
+    <key name="vpn-port" type="i">
+      <default>4090</default>
+      <summary>VPN Port</summary>
+      <description>Port for VPN connection</description>
+    </key>
+    <key name="save-password" type="b">
+      <default>false</default>
+      <summary>Save password</summary>
+      <description>Save password for automatic connection</description>
+    </key>
+    <key name="start-minimized" type="b">
+      <default>false</default>
+      <summary>Start minimized</summary>
+      <description>Don't show notifications on startup connection</description>
+    </key>
+  </schema>
+</schemalist>

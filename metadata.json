@@ -1,0 +1,15 @@
+{
+  "name": "Kerio VPN Control",
+  "description": "Control Kerio Connect VPN from GNOME Shell panel",
+  "uuid": "kerio-vpn-extension@vgeroutskis",
+  "shell-version": [
+    "45",
+    "46",
+    "47",
+    "48",
+    "49"
+  ],
+  "version": 1,
+  "url": "https://github.com/vgeroutskis/kerio-vpn-extension",
+  "settings-schema": "org.gnome.shell.extensions.kerio-vpn"
+}

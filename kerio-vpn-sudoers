@@ -1,0 +1,8 @@
+# Allow vgeroutskis to control kerio-kvc service without password
+# Install to: /etc/sudoers.d/kerio-vpn
+
+vgeroutskis ALL=(root) NOPASSWD: /usr/bin/systemctl start kerio-kvc.service
+vgeroutskis ALL=(root) NOPASSWD: /usr/bin/systemctl stop kerio-kvc.service
+vgeroutskis ALL=(root) NOPASSWD: /usr/bin/systemctl restart kerio-kvc.service
+vgeroutskis ALL=(root) NOPASSWD: /usr/bin/systemctl status kerio-kvc.service
+vgeroutskis ALL=(root) NOPASSWD: /usr/bin/mv /tmp/kerio-kvc.conf.tmp /etc/kerio-kvc.conf

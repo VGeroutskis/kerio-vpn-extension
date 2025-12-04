@@ -1,0 +1,21 @@
+#!/bin/bash
+# Wrapper script for kerio-kvc control without password
+# This will be called by the GNOME extension
+
+ACTION="$1"
+
+case "$ACTION" in
+    start)
+        systemctl start kerio-kvc.service
+        ;;
+    stop)
+        systemctl stop kerio-kvc.service
+        ;;
+    restart)
+        systemctl restart kerio-kvc.service
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac

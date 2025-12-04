@@ -1,0 +1,30 @@
+// PolicyKit rule to allow Kerio VPN service control without password
+// Install to: /etc/polkit-1/rules.d/10-kerio-vpn.rules
+
+// Allow pkexec systemctl commands for kerio-kvc service
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        subject.user == "vgeroutskis") {
+        var program = action.lookup("program");
+        var commandLine = action.lookup("command_line");
+        
+        // Allow systemctl commands for kerio-kvc
+        if (program == "/usr/bin/systemctl" || program == "/bin/systemctl") {
+            if (commandLine && (commandLine.indexOf("kerio-kvc") >= 0)) {
+                return polkit.Result.YES;
+            }
+        }
+    }
+    return polkit.Result.NOT_HANDLED;
+});
+
+// Also allow direct systemctl manage-units actions
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.systemd1.manage-units" &&
+        subject.user == "vgeroutskis") {
+        if (action.lookup("unit") == "kerio-kvc.service") {
+            return polkit.Result.YES;
+        }
+    }
+    return polkit.Result.NOT_HANDLED;
+});
