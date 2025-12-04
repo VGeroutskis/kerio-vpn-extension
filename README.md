@@ -2,6 +2,8 @@
 
 A feature-rich GNOME Shell extension for managing Kerio Control VPN Client directly from your system panel.
 
+**Kerio Control** is a unified threat management (UTM) firewall solution that provides secure VPN connectivity for remote access.
+
 ![GNOME Shell Version](https://img.shields.io/badge/GNOME%20Shell-45%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -28,9 +30,153 @@ A feature-rich GNOME Shell extension for managing Kerio Control VPN Client direc
 
 - GNOME Shell 45+
 - Kerio Control VPN Client (`kerio-kvc` service)
+- A Kerio Control server with VPN enabled
 - PolicyKit (for authentication)
 
-## Installation
+## Installing Kerio Control VPN Client
+
+Before installing the extension, you need to install the Kerio Control VPN Client on your system.
+
+### Download Kerio VPN Client
+
+Download the DEB package from the official Kerio Control VPN resources page:
+
+**Download Link**: [Kerio Control VPN Client](https://gfi.ai/products-and-solutions/network-security-solutions/keriocontrol/resources/vpn)
+
+**Note**: Kerio officially provides only **.deb** packages for Linux. For other distributions, you'll need to convert the package or extract it manually.
+
+### Installation by Distribution
+
+#### Ubuntu / Debian / Linux Mint / Pop!_OS / Zorin OS
+
+```bash
+# Download the DEB package (replace with actual version)
+wget https://cdn.kerio.com/dwn/control/control-<version>/kerio-control-vpnclient-<version>-linux-amd64.deb
+
+# Install the package
+sudo apt install ./kerio-control-vpnclient-<version>-linux-amd64.deb
+
+# Or using dpkg
+sudo dpkg -i kerio-control-vpnclient-<version>-linux-amd64.deb
+sudo apt-get install -f  # Fix dependencies if needed
+```
+
+#### Fedora / RHEL / CentOS / Rocky Linux / AlmaLinux
+
+Kerio doesn't provide official RPM packages. Convert the DEB package using `alien`:
+
+```bash
+# Using alien to convert DEB to RPM
+sudo dnf install alien
+wget https://cdn.kerio.com/dwn/control/control-<version>/kerio-control-vpnclient-<version>-linux-amd64.deb
+sudo alien -r kerio-control-vpnclient-<version>-linux-amd64.deb
+sudo dnf install kerio-control-vpnclient-<version>-1.x86_64.rpm
+```
+
+**Alternative**: Extract DEB manually (see Generic Linux section below).
+
+#### Arch Linux / Manjaro / EndeavourOS
+
+Convert the DEB package using `debtap` or extract manually:
+
+```bash
+# Option 1: Using debtap (recommended for Arch)
+yay -S debtap
+sudo debtap -u
+wget https://cdn.kerio.com/dwn/control/control-<version>/kerio-control-vpnclient-<version>-linux-amd64.deb
+debtap kerio-control-vpnclient-<version>-linux-amd64.deb
+sudo pacman -U kerio-control-vpnclient-<version>-1-x86_64.pkg.tar.zst
+
+# Option 2: Manual extraction (see Generic Linux section below)
+```
+
+Check AUR for community-maintained packages (may be outdated):
+```bash
+yay -S kerio-control-vpnclient  # If available
+```
+
+#### openSUSE / SUSE Linux Enterprise
+
+Convert the DEB package or extract manually:
+
+```bash
+# Convert DEB to RPM using alien
+sudo zypper install alien
+wget https://cdn.kerio.com/dwn/control/control-<version>/kerio-control-vpnclient-<version>-linux-amd64.deb
+sudo alien -r kerio-control-vpnclient-<version>-linux-amd64.deb
+sudo zypper install kerio-control-vpnclient-<version>-1.x86_64.rpm
+```
+
+**Alternative**: Extract DEB manually (see Generic Linux section below).
+
+#### Generic Linux (Manual Extraction - Works on all distributions)
+
+For any distribution, you can manually extract and install the DEB package:
+
+```bash
+# Download the DEB package
+wget https://cdn.kerio.com/dwn/control/control-<version>/kerio-control-vpnclient-<version>-linux-amd64.deb
+
+# Extract the package
+ar x kerio-control-vpnclient-<version>-linux-amd64.deb
+tar xf data.tar.xz
+
+# Install files to system
+sudo cp -r usr /
+sudo cp -r etc /
+
+# Reload systemd to recognize the new service
+sudo systemctl daemon-reload
+
+# Enable and start the service (optional)
+sudo systemctl enable kerio-kvc.service
+sudo systemctl start kerio-kvc.service
+```
+
+### Verify Installation
+
+After installation, verify that the Kerio VPN service is available:
+
+```bash
+# Check if service is installed
+systemctl status kerio-kvc.service
+
+# Check if config file exists
+ls -l /etc/kerio-kvc.conf
+```
+
+### Initial Configuration (Optional)
+
+You can configure the VPN manually before installing the extension:
+
+```bash
+# Edit the config file (requires root)
+sudo nano /etc/kerio-kvc.conf
+```
+
+**Example configuration** (`/etc/kerio-kvc.conf`):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <connections>
+    <connection type="persistent">
+      <server>vpn.example.com</server>
+      <port>4090</port>
+      <username>your_username</username>
+      <password>your_password</password>
+      <active>yes</active>
+      <description>My VPN Connection</description>
+    </connection>
+  </connections>
+</config>
+```
+
+**Note**: Special characters in the password are stored as HTML entities (e.g., `&#33;` for `!`, `&#35;` for `#`). The extension handles this automatically when you use the Settings panel.
+
+Or use the extension's Settings panel after installation to configure it graphically.
+
+## Extension Installation
 
 ### Automatic Installation
 
@@ -209,11 +355,12 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 MIT License - See [LICENSE](LICENSE) file for details
+## Acknowledgments
 
-## Author
-
-Vassilis Geroutskis
-
+- Built for GNOME Shell 45+
+- Designed for [Kerio Control VPN Client](https://gfi.ai/products-and-solutions/network-security-solutions/keriocontrol/resources/vpn)
+- Kerio Control is a UTM firewall solution by GFI Software
+- Uses PolicyKit/sudoers for passwordless operation
 ## Acknowledgments
 
 - Built for GNOME Shell 45+
