@@ -9,51 +9,36 @@ export class KerioConfigManager {
         this._config = null;
     }
 
-    // Decode HTML entities
-    _decodeHTMLEntities(text) {
-        const entities = {
-            '&#33;': '!',
-            '&#35;': '#',
-            '&#36;': '$',
-            '&amp;': '&',
-            '&lt;': '<',
-            '&gt;': '>',
-            '&quot;': '"',
-            '&#39;': "'",
-        };
+    // Decode XOR encoded password
+    _decodeXOR(hexString) {
+        const XOR_KEY = 85;
         
-        let decoded = text;
-        for (const [entity, char] of Object.entries(entities)) {
-            decoded = decoded.split(entity).join(char);
+        // Remove XOR: prefix if present
+        const hex = hexString.replace(/^XOR:/, '');
+        
+        // Convert hex string to bytes and XOR decode
+        let decoded = '';
+        for (let i = 0; i < hex.length; i += 2) {
+            const byte = parseInt(hex.substr(i, 2), 16);
+            decoded += String.fromCharCode(byte ^ XOR_KEY);
         }
-        
-        // Handle numeric entities
-        decoded = decoded.replace(/&#(\d+);/g, (match, dec) => {
-            return String.fromCharCode(dec);
-        });
         
         return decoded;
     }
 
-    // Encode special characters to HTML entities
-    _encodeHTMLEntities(text) {
-        const entities = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;',
-            '!': '&#33;',
-            '#': '&#35;',
-            '$': '&#36;',
-        };
+    // Encode password with XOR
+    _encodeXOR(text) {
+        const XOR_KEY = 85;
         
-        let encoded = text;
-        for (const [char, entity] of Object.entries(entities)) {
-            encoded = encoded.split(char).join(entity);
+        // XOR encode each byte
+        let encoded = '';
+        for (let i = 0; i < text.length; i++) {
+            const byte = text.charCodeAt(i) ^ XOR_KEY;
+            encoded += byte.toString(16).padStart(2, '0');
         }
         
-        return encoded;
+        // Add XOR: prefix
+        return 'XOR:' + encoded;
     }
 
     // Read configuration
@@ -99,7 +84,7 @@ export class KerioConfigManager {
             // Extract password
             const passwordMatch = xml.match(/<password>(.*?)<\/password>/);
             if (passwordMatch) {
-                config.password = this._decodeHTMLEntities(passwordMatch[1]);
+                config.password = this._decodeXOR(passwordMatch[1]);
             }
 
             // Extract fingerprint
@@ -127,8 +112,8 @@ export class KerioConfigManager {
         try {
             const server = config.server || '';
             const port = config.port || 4090;
-            const username = this._encodeHTMLEntities(config.username || '');
-            const password = this._encodeHTMLEntities(config.password || '');
+            const username = config.username || '';
+            const password = this._encodeXOR(config.password || '');
             const fingerprint = config.fingerprint || '';
             const active = config.active ? '1' : '0';
 

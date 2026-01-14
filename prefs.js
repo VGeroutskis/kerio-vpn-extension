@@ -61,6 +61,75 @@ export default class KerioVPNPreferences extends ExtensionPreferences {
         portRow.set_value(4090);
         connectionGroup.add(portRow);
 
+        // VPN Fingerprint with Auto-detect
+        const fingerprintRow = new Adw.EntryRow({
+            title: _('Server Fingerprint'),
+            text: '',
+        });
+        connectionGroup.add(fingerprintRow);
+
+        // Auto-detect fingerprint button
+        const autoDetectButton = new Gtk.Button({
+            label: _('Auto-detect Fingerprint'),
+            css_classes: ['flat'],
+            margin_top: 6,
+        });
+        connectionGroup.add(autoDetectButton);
+
+        autoDetectButton.connect('clicked', async () => {
+            const server = serverRow.get_text();
+            const port = portRow.get_value();
+            
+            if (!server) {
+                autoDetectButton.set_label(_('✗ Enter server address first'));
+                GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
+                    autoDetectButton.set_label(_('Auto-detect Fingerprint'));
+                    return GLib.SOURCE_REMOVE;
+                });
+                return;
+            }
+
+            autoDetectButton.set_sensitive(false);
+            autoDetectButton.set_label(_('Detecting...'));
+
+            try {
+                // Run openssl command to get fingerprint
+                const proc = Gio.Subprocess.new(
+                    ['bash', '-c', `echo | openssl s_client -connect ${server}:${port} 2>/dev/null | openssl x509 -fingerprint -md5 -noout | sed 's/.*=//'`],
+                    Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+                );
+
+                const [stdout, stderr] = await new Promise((resolve, reject) => {
+                    proc.communicate_utf8_async(null, null, (proc, res) => {
+                        try {
+                            const [, stdout, stderr] = proc.communicate_utf8_finish(res);
+                            resolve([stdout, stderr]);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                });
+
+                const fingerprint = stdout.trim();
+                
+                if (fingerprint && fingerprint.match(/^[A-F0-9:]+$/i)) {
+                    fingerprintRow.set_text(fingerprint);
+                    autoDetectButton.set_label(_('✓ Detected!'));
+                } else {
+                    autoDetectButton.set_label(_('✗ Detection failed'));
+                }
+            } catch (e) {
+                console.error('Failed to detect fingerprint:', e);
+                autoDetectButton.set_label(_('✗ Error'));
+            }
+
+            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
+                autoDetectButton.set_label(_('Auto-detect Fingerprint'));
+                autoDetectButton.set_sensitive(true);
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+
         // Save button
         const saveButton = new Gtk.Button({
             label: _('Save to Kerio Config'),
@@ -75,7 +144,7 @@ export default class KerioVPNPreferences extends ExtensionPreferences {
                 username: usernameRow.get_text(),
                 password: passwordRow.get_text(),
                 port: portRow.get_value(),
-                fingerprint: kerioConfig?.fingerprint || '',
+                fingerprint: fingerprintRow.get_text(),
                 active: true
             };
 
@@ -111,6 +180,7 @@ export default class KerioVPNPreferences extends ExtensionPreferences {
                 usernameRow.set_text(config.username);
                 passwordRow.set_text(config.password);
                 portRow.set_value(config.port);
+                fingerprintRow.set_text(config.fingerprint || '');
             }
         }).catch(e => {
             console.error('Failed to load Kerio config:', e);
