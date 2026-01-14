@@ -78,7 +78,7 @@ export class KerioConfigManager {
             // Extract username
             const usernameMatch = xml.match(/<username>(.*?)<\/username>/);
             if (usernameMatch) {
-                config.username = this._decodeHTMLEntities(usernameMatch[1]);
+                config.username = usernameMatch[1];
             }
 
             // Extract password
