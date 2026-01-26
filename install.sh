@@ -35,6 +35,29 @@ else
 fi
 
 echo ""
+echo "Configuring passwordless sudo..."
+USERNAME=$(whoami)
+SUDOERS_SOURCE="kerio-vpn-sudoers"
+TEMP_SUDOERS="/tmp/kerio-vpn-sudoers"
+
+if [ -f "$SUDOERS_SOURCE" ]; then
+    # Update username in sudoers file
+    sed "s/vgeroutskis/$USERNAME/g" "$SUDOERS_SOURCE" > "$TEMP_SUDOERS"
+    
+    echo "Installing sudoers configuration (requires sudo)..."
+    if sudo cp "$TEMP_SUDOERS" "/etc/sudoers.d/kerio-vpn"; then
+        sudo chmod 440 "/etc/sudoers.d/kerio-vpn"
+        echo "✓ Passwordless sudo configured successfully"
+    else
+        echo "⚠ Warning: Failed to install sudoers configuration"
+        echo "You can try installing it manually: sudo cp kerio-vpn-sudoers /etc/sudoers.d/kerio-vpn"
+    fi
+    rm -f "$TEMP_SUDOERS"
+else
+    echo "⚠ Warning: $SUDOERS_SOURCE not found"
+fi
+
+echo ""
 echo "Installation complete!"
 echo ""
 echo "To enable the extension:"
